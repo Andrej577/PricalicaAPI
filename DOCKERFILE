@@ -1,0 +1,20 @@
+# Bazira se na oficijelnom Node.js image-u (predefinisan)
+FROM node:20
+
+# Kreiraj radni direktorijum u kontejneru
+WORKDIR /app
+
+# Kopiraj package fajlove
+COPY package*.json ./
+
+# Instaliraj zavisnosti
+RUN npm install express sequelize pg pg-hstore dotenv nodemon
+
+# Kopiraj ostatak aplikacije
+COPY . .
+
+# Port koji app koristi
+EXPOSE 3000
+
+# Start komanda
+CMD ["npm", "start"]
