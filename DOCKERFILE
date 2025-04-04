@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Instaliraj zavisnosti
-RUN npm install express sequelize pg pg-hstore dotenv nodemon
+RUN npm install express pg pg-hstore dotenv
 
 # Kopiraj ostatak aplikacije
 COPY . .
