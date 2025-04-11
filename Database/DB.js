@@ -1,7 +1,6 @@
 require('dotenv').config(); // učitavanje .env fajla
 const { Pool } = require('pg');
 
-// Konfiguracija konekcije
 const pool = new Pool({
     user: process.env.DB_USER,
     host: process.env.DB_HOST,
@@ -10,7 +9,9 @@ const pool = new Pool({
     port: process.env.DB_PORT,
 });
 
-// Test konekcije
+
+// Dali da se ubaci da se servis niti ne pokrece ako se ne moze spojiti sa bazom??
+// Poanta servisa i je da se spoji sa bazom, ako to ne moze onda sta???
 async function testConnection() {
     try {
         const client = await pool.connect();

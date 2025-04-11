@@ -4,11 +4,9 @@ FROM node:20
 # Kreiraj radni direktorijum u kontejneru
 WORKDIR /app
 
-# Kopiraj package fajlove
-COPY package*.json ./
 
 # Instaliraj zavisnosti
-RUN npm install express pg pg-hstore dotenv
+RUN npm install express pg pg-hstore dotenv jest supertest
 
 # Kopiraj ostatak aplikacije
 COPY . .
