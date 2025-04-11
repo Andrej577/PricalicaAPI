@@ -10,6 +10,8 @@ const transakcijeRoutes = require('./Routes/transakcije');
 const interakcijeRoutes = require('./Routes/interakcije');
 const analitikaRoutes = require('./Routes/analitika');
 const povijestRoutes = require('./Routes/povijestSlusanja');
+const loginRoutes = require('./Routes/login');
+
 
 testConnection();
 
@@ -25,6 +27,7 @@ app.use("/transakcije", transakcijeRoutes);
 app.use("/interakcije", interakcijeRoutes);
 app.use("/analitika", analitikaRoutes);
 app.use("/povijest_slusanja", povijestRoutes);
+app.use("/login", loginRoutes);
 
 // huh...ovo mora biti ovako inace Jest(test framework) poludi jer ne moze zatvoriti handle-ove
 // sta to znaci?
