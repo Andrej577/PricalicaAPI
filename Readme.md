@@ -13,7 +13,7 @@ Svi API endpointi vraćaju podatke u **JSON** formatu.
 
 1. Kloniraj repozitorij:
    ```bash
-   git clone <repo-url>
+   git clone https://github.com/Andrej577/PricalicaAPI.git
    cd pricalica-api
    ```
 
