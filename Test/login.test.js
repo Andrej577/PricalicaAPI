@@ -6,8 +6,8 @@ test('POST /login - ispravni podaci', async () => {
     const res = await request(app)
         .post('/login')
         .send({
-            email: 'lana.kovac@example.com',
-            lozinka: 'hashedpassword5'
+            email: 'luka.babic@example.com',
+            lozinka: 'LukaBest88'
         });
 
     expect(res.statusCode).toBe(200);

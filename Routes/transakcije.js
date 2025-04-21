@@ -4,8 +4,8 @@ const db = require('../Database/DB');
 
 router.get('/', async (req, res) => {
     try {
-        const result = await db.pool.query('SELECT * FROM transakcije');
-        res.json(result.rows);
+        const [rows] = await db.pool.query('SELECT * FROM transakcije');
+        res.json(rows);
     } catch (err) {
         console.error('Greška pri dohvaćanju transakcija:', err);
         res.status(500).json({ error: 'Greška na serveru' });
@@ -19,8 +19,8 @@ router.delete('/:id', async (req, res) =>
     {
         // za serializaciju se koristi $ znak a ne ?
         // Ovo ce realno bacit constraint ako postoji bilo kakva interakcija ili povijest slusanja
-        const result = await db.pool.query("DELETE FROM transakcije WHERE transakcija_id = $1;", [transakcijaId]);
-        if (result.rowCount == 0)
+        const [rows] = await db.pool.query("DELETE FROM transakcije WHERE transakcija_id = $1;", [transakcijaId]);
+        if (rows.length === 0)
         {
             return res.status(404).json({ Odgovor: "Brisanje nije uspjelo"});
         }
@@ -43,8 +43,8 @@ router.put('/:id', async (req, res) =>
     {
         // za serializaciju se koristi $ znak a ne ?
         // Ovo ce realno bacit constraint ako postoji bilo kakva interakcija ili povijest slusanja
-        const result = await db.pool.query("UPDATE transakcije SET status = $1 WHERE transakcija_id = $2;", [status, transakcijaId]);
-        if (result.rowCount == 0)
+        const [rows] = await db.pool.query("UPDATE transakcije SET status = $1 WHERE transakcija_id = $2;", [status, transakcijaId]);
+        if (rows.length === 0)
         {
             return res.status(404).json({ Odgovor: "Ažuriranje nije uspjelo"});
         }

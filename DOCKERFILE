@@ -6,7 +6,7 @@ WORKDIR /app
 
 
 # Instaliraj zavisnosti
-RUN npm install express pg pg-hstore dotenv jest supertest
+RUN npm install express mysql2 dotenv jest supertest
 
 # Kopiraj ostatak aplikacije
 COPY . .

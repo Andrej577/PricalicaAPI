@@ -7,13 +7,13 @@ async function login(req, res) {
     const { email, lozinka } = req.body;
 
     try {
-        const result = await db.pool.query(
-            'SELECT * FROM korisnici WHERE email = $1 AND lozinka_hash = $2',
+        const [rows] = await db.pool.query(
+            'SELECT * FROM korisnici WHERE email = ? AND lozinka_hash = ?',
             [email, lozinka]
         );
 
-        if (result.rowCount === 0) {
-            return res.status(401).json({ error: 'error' });
+        if (rows.length === 0) {
+            return res.status(401).json({ error: 'Neispravni podaci za prijavu' });
         }
 
         return res.status(200).json({ message: 'Prijava uspješna' });
