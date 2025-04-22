@@ -11,6 +11,8 @@ services:
     environment:
       - NODE_ENV=${NODE_ENV}
     command: ["node", "index.js"]
+    networks:
+      - pricalica-network
 
   test:
     build: .
@@ -18,6 +20,12 @@ services:
     command: ["npm", "test", "--", "--ci", "--detectOpenHandles"]
     environment:
       NODE_ENV: test
+    networks:
+      - pricalica-network
 
 volumes:
   node_modules:
+
+networks:
+  pricalica-network:
+    external: true
