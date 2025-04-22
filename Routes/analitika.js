@@ -19,7 +19,7 @@ router.delete('/:id', async (req, res) =>
     {
         // za serializaciju se koristi $ znak a ne ?
         // Ovo ce realno bacit constraint ako postoji bilo kakva interakcija ili povijest slusanja
-        const [rows] = await db.pool.query("DELETE FROM analitika WHERE analitika_id = $1;", [analitikaId]);
+        const [rows] = await db.pool.query("DELETE FROM analitika WHERE analitika_id = ?;", [analitikaId]);
         if (rows.length === 0)
         {
             return res.status(404).json({ Odgovor: "Brisanje nije uspjelo"});
@@ -41,9 +41,7 @@ router.put('/:id', async (req, res) =>
     const brojslusanja = req.body;
     try
     {
-        // za serializaciju se koristi $ znak a ne ?
-        // Ovo ce realno bacit constraint ako postoji bilo kakva interakcija ili povijest slusanja
-        const [rows] = await db.pool.query("UPDATE analitika SET broj_slusanja = $1 WHERE analitika_id = $2;", [brojslusanja, analitikaId]);
+        const [rows] = await db.pool.query("UPDATE analitika SET broj_slusanja = ? WHERE analitika_id = ?;", [brojslusanja, analitikaId]);
         if (rows.length === 0)
         {
             return res.status(404).json({ Odgovor: "Ažuriranje nije uspjelo"});

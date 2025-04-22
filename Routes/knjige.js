@@ -17,8 +17,6 @@ router.delete('/:id', async (req, res) =>
     const knjigaId = req.params.id;
     try
     {
-        // za serializaciju se koristi $ znak a ne ?
-        // Ovo ce realno bacit constraint ako postoji bilo kakva interakcija ili povijest slusanja
         const [rows] = await db.pool.query("DELETE FROM knjige WHERE knjiga_id = ?;", [knjigaId]);
         if (rows.length === 0)
         {
@@ -41,8 +39,6 @@ router.put('/:id', async (req, res) =>
     const naslov = req.body;
     try
     {
-        // za serializaciju se koristi $ znak a ne ?
-        // Ovo ce realno bacit constraint ako postoji bilo kakva interakcija ili povijest slusanja
         const [rows] = await db.pool.query("UPDATE knjige SET naslov = ? WHERE knjiga_id = ?;", [naslov, knjigaId]);
         if (rows.length === 0)
         {
