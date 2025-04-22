@@ -11,7 +11,7 @@ const interakcijeRoutes = require('./Routes/interakcije');
 const analitikaRoutes = require('./Routes/analitika');
 const povijestRoutes = require('./Routes/povijestSlusanja');
 const loginRoutes = require('./Routes/login');
-
+const zanroviRoutes = require('./Routes/zanrovi');
 
 testConnection();
 
@@ -28,6 +28,7 @@ app.use("/interakcije", interakcijeRoutes);
 app.use("/analitika", analitikaRoutes);
 app.use("/povijest_slusanja", povijestRoutes);
 app.use("/login", loginRoutes);
+app.use('/zanrovi', zanroviRoutes);
 
 // huh...ovo mora biti ovako inace Jest(test framework) poludi jer ne moze zatvoriti handle-ove
 // sta to znaci?
@@ -36,7 +37,6 @@ app.use("/login", loginRoutes);
 // jer se Jest ne moze vratiti u index.js i zatvorit handle posto ga on nije niti otvorio (njega otvara core/main)
 // teoretski app.listen se moze i maknut al nije rjesenje jer necemo svaki event micat iz modula zbog glupih testova
 if (require.main === module) {
-    const PORT = process.env.PORT || 3000;
     testConnection();
     app.listen(PORT, () => {
         console.log(`Server radi na http://localhost:${PORT}`);

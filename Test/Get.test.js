@@ -39,6 +39,12 @@ test('GET /transakcije', async () => {
     expect(Array.isArray(res.body)).toBe(true);
 });
 
+test('GET /zanrovi', async () => {
+    const res = await request(app).get('/zanrovi');
+    expect(res.statusCode).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
+});
+
 afterAll(async () => {
     await pool.end(); //zatvori konekcijski pool - problemi sa Jestom jer ne moze zatvoriti konekciju sa bazom
 });
