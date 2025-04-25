@@ -55,6 +55,7 @@ Aplikacija će raditi na:
 /Routes/interakcije.js     -> Rute za recenzije, ocjene
 /Routes/analitika.js       -> Rute za analitiku slusanja
 /Routes/povijestSlusanja.js -> Povijest slusanja knjiga
+/Routes/zanrovi.js         -> Rute za žanrove
 /Routes/login.js           -> Login i autentifikacija
 index.js                   -> Glavna aplikacija
 Dockerfile                 -> Definicija Docker image-a
