@@ -76,7 +76,7 @@ Sve rute koriste **HTTP metode** i vraćaju **JSON** odgovor.
 | `GET /transakcije`         | Dohvat svih transakcija |
 | `GET /interakcije`         | Dohvat svih interakcija/recenzija |
 | `GET /analitika`           | Dohvat analitike slusanja |
-| `GET /zanrovi`             | Dohvat žanorova | 
+| `GET /zanrovi`             | Dohvat žanrova | 
 | `GET /povijest_slusanja`   | Dohvat povijesti slusanja |
 | `POST /login`              | Prijava korisnika |
 
