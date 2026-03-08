@@ -1,8 +1,8 @@
 # Pricalica API
 
-Backend REST API aplikaciju za upravljanje korisnicima, knjigama, transakcijama i interakcijama!
+Backend REST API aplikaciju za upravljanje korisnicima, knjigama, transakcijama i interakcijama.
 
-Aplikacija je rađena u **Node.js** s korištenjem **Express** frameworka, a komunikacija s bazom je napravljena kroz vlastite module.
+Aplikacija je napravljena u **Node.js** upotrebom **Express** frameworka, a komunikacija s bazom je napravljena kroz vlastite module.
 Svi API endpointi vraćaju podatke u **JSON** formatu.
 
 ---
