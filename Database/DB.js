@@ -1,30 +1,28 @@
-require('dotenv').config(); // učitavanje .env fajla
 const mysql = require('mysql2/promise');
+require('dotenv').config();
 
 const pool = mysql.createPool({
     host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    database: process.env.DB_NAME,
-    password: process.env.DB_PASS,
     port: process.env.DB_PORT,
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME
 });
 
-// Ako ne može spojiti bazu, možemo prekinuti aplikaciju
 async function testConnection() {
     try {
         const connection = await pool.getConnection();
-        console.log('Spojen na MySQL bazu');
+        console.log('Spojeno na MySQL bazu');
         connection.release();
     } catch (error) {
         console.error('Greška pri spajanju s MySQL bazom:', error);
-        process.exit(1); // zatvori aplikaciju ako nema konekcije
+
+        if (process.env.NODE_ENV !== 'test') {
+            process.exit(1);
+        }
+
+        throw error;
     }
 }
 
-module.exports = {
-    pool,
-    testConnection,
-};
+module.exports = { pool, testConnection };
