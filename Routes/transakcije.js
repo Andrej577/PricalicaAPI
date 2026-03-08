@@ -18,7 +18,7 @@ router.delete('/:id', async (req, res) =>
     try
     {
         const [rows] = await db.pool.query("DELETE FROM transakcije WHERE transakcija_id = ?;", [transakcijaId]);
-        if (rows.length === 0)
+        if (rows.affectedRows === 0)
         {
             return res.status(404).json({ Odgovor: "Brisanje nije uspjelo"});
         }
@@ -36,11 +36,11 @@ router.delete('/:id', async (req, res) =>
 router.put('/:id', async (req, res) =>
 {
     const transakcijaId = req.params.id;
-    const status = req.body;
+    const { statusTransakcije_id } = req.body;
     try
     {
-        const [rows] = await db.pool.query("UPDATE transakcije SET status = ? WHERE transakcija_id = ?;", [status, transakcijaId]);
-        if (rows.length === 0)
+        const [rows] = await db.pool.query("UPDATE transakcije SET statusTransakcije_id = ? WHERE transakcija_id = ?;", [statusTransakcije_id, transakcijaId]);
+        if (rows.affectedRows === 0)
         {
             return res.status(404).json({ Odgovor: "Ažuriranje nije uspjelo"});
         }

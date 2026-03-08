@@ -18,7 +18,7 @@ testConnection();
 app.use(express.json());
 
 app.get('/', (req, res) => {
-    res.send('Pozdrav iz Node.js aplikacije');
+    res.send('Api main');
 });
 
 app.use('/korisnici', korisniciRoutes);

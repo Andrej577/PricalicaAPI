@@ -38,7 +38,7 @@ router.delete('/:id', async (req, res) =>
 router.put('/:id', async (req, res) =>
 {
     const analitikaId = req.params.id;
-    const brojslusanja = req.body;
+    const { brojslusanja } = req.body;
     try
     {
         const [rows] = await db.pool.query("UPDATE analitika SET broj_slusanja = ? WHERE analitika_id = ?;", [brojslusanja, analitikaId]);

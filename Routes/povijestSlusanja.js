@@ -37,11 +37,11 @@ router.delete('/:id', async (req, res) =>
 router.put('/:id', async (req, res) =>
 {
     const povijestId = req.params.id;
-    const pozicijia = req.body;
+    const { pozicija } = req.body;
     try
     {
         // Ovo ce realno bacit constraint ako postoji bilo kakva interakcija ili povijest slusanja
-        const [rows] = await db.pool.query("UPDATE povijest_slusanja SET pozicija = ? WHERE povijest_id = ?;", [pozicijia, povijestId]);
+        const [rows] = await db.pool.query("UPDATE povijest_slusanja SET pozicija = ? WHERE povijest_id = ?;", [pozicija, povijestId]);
         if (rows.length === 0)
         {
             return res.status(404).json({ Odgovor: "Ažuriranje nije uspjelo"});

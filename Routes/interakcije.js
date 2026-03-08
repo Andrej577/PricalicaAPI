@@ -37,10 +37,10 @@ router.delete('/:id', async (req, res) =>
 router.put('/:id', async (req, res) =>
 {
     const interakcijaId = req.params.id;
-    const ocjena = req.body;
+    const { ocjena } = req.body;
     try
     {
-        const [rows] = await db.pool.query("UPDATE interakcije SET ocjena = ? WHERE interakcija_id = ?;", [naslov, interakcijaId]);
+        const [rows] = await db.pool.query("UPDATE interakcije SET ocjena = ? WHERE interakcija_id = ?;", [ocjena, interakcijaId]);
         if (rows.length === 0)
         {
             return res.status(404).json({ Odgovor: "Ažuriranje nije uspjelo"});
