@@ -16,7 +16,7 @@ const pool = mysql.createPool({
 async function testConnection() {
     try {
         const connection = await pool.getConnection();
-        console.log('Spojeni na MySQL bazu! Bravo');
+        console.log('Spojen na MySQL bazu');
         connection.release();
     } catch (error) {
         console.error('Greška pri spajanju s MySQL bazom:', error);
