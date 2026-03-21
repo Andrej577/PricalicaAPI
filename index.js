@@ -7,7 +7,6 @@ const { testConnection } = require('./Database/DB');
 
 const korisniciRoutes = require('./Routes/korisnici');
 const knjigeRoutes = require('./Routes/knjige');
-const transakcijeRoutes = require('./Routes/transakcije');
 const interakcijeRoutes = require('./Routes/interakcije');
 const analitikaRoutes = require('./Routes/analitika');
 const povijestRoutes = require('./Routes/povijestSlusanja');
@@ -25,7 +24,6 @@ app.get('/', (req, res) => {
 
 app.use('/korisnici', korisniciRoutes);
 app.use("/knjige", knjigeRoutes);
-app.use("/transakcije", transakcijeRoutes);
 app.use("/interakcije", interakcijeRoutes);
 app.use("/analitika", analitikaRoutes);
 app.use("/povijest_slusanja", povijestRoutes);
