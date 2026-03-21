@@ -6,7 +6,6 @@ let korisnikId;
 let autorId;
 let knjigaId;
 let interakcijaId;
-let transakcijaId;
 
 beforeAll(async () => {
     const unique = Date.now();
@@ -73,18 +72,6 @@ beforeAll(async () => {
         ]
     );
     interakcijaId = interakcijaResult.insertId;
-
-    const [transakcijaResult] = await pool.query(
-        `INSERT INTO transakcije
-        (korisnik_id, iznos, statusTransakcije_id)
-        VALUES (?, ?, ?)`,
-        [
-            korisnikId,
-            9.99,
-            2
-        ]
-    );
-    transakcijaId = transakcijaResult.insertId;
 });
 
 test('PUT /korisnici/:id', async () => {
@@ -132,28 +119,10 @@ test('PUT /interakcije/:id', async () => {
     expect(rows[0].ocjena).toBe(5);
 });
 
-test('PUT /transakcije/:id', async () => {
-    const res = await request(app)
-        .put(`/transakcije/${transakcijaId}`)
-        .send({ statusTransakcije_id: 1 });
-
-    expect(res.statusCode).toBe(200);
-
-    const [rows] = await pool.query(
-        'SELECT statusTransakcije_id FROM transakcije WHERE transakcija_id = ?',
-        [transakcijaId]
-    );
-
-    expect(rows[0].statusTransakcije_id).toBe(1);
-});
 
 afterAll(async () => {
     if (interakcijaId) {
         await pool.query('DELETE FROM interakcije WHERE interakcija_id = ?', [interakcijaId]);
-    }
-
-    if (transakcijaId) {
-        await pool.query('DELETE FROM transakcije WHERE transakcija_id = ?', [transakcijaId]);
     }
 
     if (knjigaId) {

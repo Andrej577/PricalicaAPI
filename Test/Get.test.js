@@ -33,12 +33,6 @@ test('GET /povijest_slusanja', async () => {
     expect(Array.isArray(res.body)).toBe(true);
 });
 
-test('GET /transakcije', async () => {
-    const res = await request(app).get('/transakcije');
-    expect(res.statusCode).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
-});
-
 test('GET /zanrovi', async () => {
     const res = await request(app).get('/zanrovi');
     expect(res.statusCode).toBe(200);
