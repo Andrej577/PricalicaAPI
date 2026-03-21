@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
+import cors from 'cors'
 
 const { testConnection } = require('./Database/DB');
 
@@ -15,6 +16,7 @@ const zanroviRoutes = require('./Routes/zanrovi');
 
 testConnection();
 
+app.use(cors());
 app.use(express.json());
 
 app.get('/', (req, res) => {
