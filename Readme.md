@@ -12,12 +12,14 @@ Svi API endpointi vraćaju podatke u **JSON** formatu.
 ### Lokalno
 
 1. Kloniraj repozitorij:
+
    ```bash
    git clone https://github.com/Andrej577/PricalicaAPI.git
    cd pricalica-api
    ```
 
 2. Instaliraj potrebne pakete:
+
    ```bash
    npm install
    ```
@@ -33,6 +35,7 @@ Aplikacija će raditi na:
 ### Putem Dockera
 
 1. Pokreni aplikaciju koristeći **Dockerfile**:
+
    ```bash
    docker build -t pricalica-api .
    docker run -p 3000:3000 pricalica-api
@@ -68,19 +71,19 @@ docker-compose.yml         -> Konfiguracija za Docker Compose
 
 Sve rute koriste **HTTP metode** i vraćaju **JSON** odgovor.
 
-| Endpoint                  | Opis |
-|----------------------------|------|
-| `GET /`                    | Pozdravna poruka |
-| `GET /korisnici`           | Dohvat svih korisnika |
-| `GET /knjige`              | Dohvat svih knjiga |
-| `GET /transakcije`         | Dohvat svih transakcija |
-| `GET /interakcije`         | Dohvat svih interakcija/recenzija |
-| `GET /analitika`           | Dohvat analitike slusanja |
-| `GET /zanrovi`             | Dohvat žanrova | 
-| `GET /povijest_slusanja`   | Dohvat povijesti slusanja |
-| `POST /login`              | Prijava korisnika |
+| Endpoint                 | Opis                              |
+| ------------------------ | --------------------------------- |
+| `GET /`                  | Pozdravna poruka                  |
+| `GET /korisnici`         | Dohvat svih korisnika             |
+| `GET /knjige`            | Dohvat svih knjiga                |
+| `GET /transakcije`       | Dohvat svih transakcija           |
+| `GET /interakcije`       | Dohvat svih interakcija/recenzija |
+| `GET /analitika`         | Dohvat analitike slusanja         |
+| `GET /zanrovi`           | Dohvat žanrova                    |
+| `GET /povijest_slusanja` | Dohvat povijesti slusanja         |
+| `POST /login`            | Prijava korisnika                 |
 
-*(mogu postojati i dodatne metode po ruti – ovisi o implementaciji)*
+_(mogu postojati i dodatne metode po ruti – ovisi o implementaciji)_
 
 ---
 
@@ -106,7 +109,7 @@ Zato se server (`listen`) pokrece samo ako se `index.js` direktno izvrsava.
 - Node.js
 - Express.js
 - MySQL (baza podataka)
-- Jest (za testiranje - predviđeno)
+- Jest (za testiranje)
 - Dotenv (ako se koristi `.env` za konfiguraciju)
 - Docker & Docker Compose (za lakse pokretanje)
 
