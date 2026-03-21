@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
-import cors from 'cors'
+const cors = require('cors');
 
 const { testConnection } = require('./Database/DB');
 
@@ -40,7 +40,7 @@ app.use('/zanrovi', zanroviRoutes);
 // teoretski app.listen se moze i maknut al nije rjesenje jer necemo svaki event micat iz modula zbog glupih testova
 if (require.main === module) {
     testConnection();
-    app.listen(PORT, () => {
+    app.listen(PORT, '0.0.0.0', () => {
         console.log(`Server radi na http://localhost:${PORT}`);
     });
 }
