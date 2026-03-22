@@ -12,27 +12,17 @@ router.get('/', async (req, res) => {
     }
 });
 
-router.delete('/:id', async (req, res) =>
-{
-    const interakcijaId = req.params.id;
-    try
-    {
-        // Ovo ce realno bacit constraint ako postoji bilo kakva interakcija ili povijest slusanja
-        const [rows] = await db.pool.query("DELETE FROM interakcije WHERE interakcija_id = ?;", [interakcijaId]);
-        if (rows.length === 0)
-        {
-            return res.status(404).json({ Odgovor: "Brisanje nije uspjelo"});
-        }
-        else
-        {
-            return res.status(200).json("Interakcija obrisana");
-        }
-    }
-    catch(err)
-    {
-        return res.status(500).json(err);
-    }
-})
+
+router.get('/knjiga/:knjigaId', async (req, res) => {
+    const knjigaId = req.params.knjigaId;
+    try {
+        const [rows] = await db.pool.query('SELECT * FROM interakcije WHERE knjiga_id = ?', [knjigaId]);
+        res.json(rows);
+    } catch (err) {
+        console.error('Greška pri dohvaćanju interakcija:', err);
+        res.status(500).json({ error: 'Greška na serveru' });
+    }   
+});
 
 router.put('/:id', async (req, res) =>
 {
@@ -48,6 +38,28 @@ router.put('/:id', async (req, res) =>
         else
         {
             return res.status(200).json("Interakcija je ažurirana");
+        }
+    }
+    catch(err)
+    {
+        return res.status(500).json(err);
+    }
+})
+
+router.delete('/:id', async (req, res) =>
+{
+    const interakcijaId = req.params.id;
+    try
+    {
+        // Ovo ce realno bacit constraint ako postoji bilo kakva interakcija ili povijest slusanja
+        const [rows] = await db.pool.query("DELETE FROM interakcije WHERE interakcija_id = ?;", [interakcijaId]);
+        if (rows.length === 0)
+        {
+            return res.status(404).json({ Odgovor: "Brisanje nije uspjelo"});
+        }
+        else
+        {
+            return res.status(200).json("Interakcija obrisana");
         }
     }
     catch(err)

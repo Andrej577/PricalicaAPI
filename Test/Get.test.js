@@ -15,6 +15,20 @@ test('GET /knjige', async () => {
     expect(Array.isArray(res.body)).toBe(true);
 });
 
+test('GET /knjige/:id', async () => {
+    const res = await request(app).get('/knjige/1');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveProperty('knjiga_id', 1);
+    expect(res.body).toHaveProperty('naslov');
+    expect(res.body).toHaveProperty('autor_id');
+});
+
+test('GET /interakcije/knjiga/:knjigaId', async () => {
+    const res = await request(app).get('/interakcije/1');
+    expect(res.statusCode).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true); 
+});
+
 test('GET /analitka', async () => {
     const res = await request(app).get('/analitika');
     expect(res.statusCode).toBe(200);
