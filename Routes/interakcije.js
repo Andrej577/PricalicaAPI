@@ -16,7 +16,8 @@ router.get('/', async (req, res) => {
 router.get('/knjiga/:knjigaId', async (req, res) => {
     const knjigaId = req.params.knjigaId;
     try {
-        const [rows] = await db.pool.query('SELECT * FROM interakcije WHERE knjiga_id = ?', [knjigaId]);
+        const [rows] = await db.pool.query(`SELECT i.vrijeme_ostavljanja as datum, k.ime, k.prezime, i.recenzija AS tekst, i.ocjena from interakcije i 
+INNER JOIN korisnici k on k.korisnik_id = i.korisnik_id where i.knjiga_id = ?`, [knjigaId]);
         res.json(rows);
     } catch (err) {
         console.error('Greška pri dohvaćanju interakcija:', err);
