@@ -29,6 +29,49 @@ router.get('/:id', async (req, res) => {
     }
 });
 
+router.post('/', async (req, res) => {
+    const {
+        ime,
+        prezime,
+        email,
+        lozinka,
+        tipKorisnika,
+        statusRacuna,
+    } = req.body;
+
+    const tipKorisnikaId = Number(tipKorisnika ?? 3);
+    const statusRacunaId = Number(statusRacuna ?? 1);
+
+    if (!ime || !prezime || !email || !lozinka) {
+        return res.status(400).json({ error: 'Ime, prezime, email i lozinka su obavezni.' });
+    }
+
+    try {
+        const [result] = await db.pool.query(
+            `INSERT INTO korisnici
+             (ime, prezime, email, lozinka_hash, tipKorisnika_id, statusRacuna_id)
+             VALUES (?, ?, ?, ?, ?, ?);`,
+            [
+                ime,
+                prezime,
+                email,
+                lozinka,
+                tipKorisnikaId,
+                statusRacunaId,
+            ],
+        );
+
+        const [rows] = await db.pool.query('SELECT * FROM korisnici WHERE korisnik_id = ?;', [
+            result.insertId,
+        ]);
+
+        return res.status(201).json(rows[0]);
+    } catch (err) {
+        console.error('Greska pri dodavanju korisnika:', err);
+        return res.status(500).json({ error: 'Greska na serveru' });
+    }
+});
+
 router.put('/:id', async (req, res) => {
     const korisnikId = req.params.id;
     const {
