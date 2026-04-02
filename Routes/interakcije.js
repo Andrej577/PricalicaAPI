@@ -15,13 +15,19 @@ router.get('/', async (req, res) => {
 router.get('/knjiga/:knjigaId', async (req, res) => {
     const knjigaId = req.params.knjigaId;
     try {
-        const [rows] = await db.pool.query(`SELECT i.vrijeme_ostavljanja as datum, k.ime, k.prezime, i.recenzija AS tekst, i.ocjena from interakcije i 
-INNER JOIN korisnici k on k.korisnik_id = i.korisnik_id where i.knjiga_id = ?`, [knjigaId]);
+        const [rows] = await db.pool.query(
+            `SELECT i.interakcija_id AS id, i.vrijeme_ostavljanja AS datum, k.ime, k.prezime, i.recenzija AS tekst, i.ocjena
+             FROM interakcije i
+             INNER JOIN korisnici k ON k.korisnik_id = i.korisnik_id
+             WHERE i.knjiga_id = ?
+             ORDER BY i.vrijeme_ostavljanja DESC`,
+            [knjigaId]
+        );
         res.json(rows);
     } catch (err) {
         console.error('Greska pri dohvacanju interakcija:', err);
         res.status(500).json({ error: 'Greska na serveru' });
-    }   
+    }
 });
 
 router.post('/', async (req, res) => {

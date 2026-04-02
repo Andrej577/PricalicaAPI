@@ -16,10 +16,16 @@ async function login(req, res) {
             return res.status(401).json({ error: 'Neispravni podaci za prijavu' });
         }
 
-        return res.status(200).json({ message: 'Prijava uspješna' });
+        return res.status(200).json({
+            message: 'Prijava uspjesna',
+            korisnik_id: rows[0].korisnik_id,
+            ime: rows[0].ime,
+            prezime: rows[0].prezime,
+            email: rows[0].email,
+        });
     } catch (err) {
-        console.error('Greška kod prijave:', err);
-        res.status(500).json({ error: 'Greška na serveru' });
+        console.error('Greska kod prijave:', err);
+        res.status(500).json({ error: 'Greska na serveru' });
     }
 }
 
