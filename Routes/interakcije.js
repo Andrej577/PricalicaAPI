@@ -7,11 +7,10 @@ router.get('/', async (req, res) => {
         const [rows] = await db.pool.query('SELECT * FROM interakcije');
         res.json(rows);
     } catch (err) {
-        console.error('Greška pri dohvaćanju interakcije:', err);
-        res.status(500).json({ error: 'Greška na serveru' });
+        console.error('Greska pri dohvacanju interakcije:', err);
+        res.status(500).json({ error: 'Greska na serveru' });
     }
 });
-
 
 router.get('/knjiga/:knjigaId', async (req, res) => {
     const knjigaId = req.params.knjigaId;
@@ -20,53 +19,102 @@ router.get('/knjiga/:knjigaId', async (req, res) => {
 INNER JOIN korisnici k on k.korisnik_id = i.korisnik_id where i.knjiga_id = ?`, [knjigaId]);
         res.json(rows);
     } catch (err) {
-        console.error('Greška pri dohvaćanju interakcija:', err);
-        res.status(500).json({ error: 'Greška na serveru' });
+        console.error('Greska pri dohvacanju interakcija:', err);
+        res.status(500).json({ error: 'Greska na serveru' });
     }   
 });
 
-router.put('/:id', async (req, res) =>
-{
-    const interakcijaId = req.params.id;
-    const { ocjena } = req.body;
-    try
-    {
-        const [rows] = await db.pool.query("UPDATE interakcije SET ocjena = ? WHERE interakcija_id = ?;", [ocjena, interakcijaId]);
-        if (rows.length === 0)
-        {
-            return res.status(404).json({ Odgovor: "Ažuriranje nije uspjelo"});
-        }
-        else
-        {
-            return res.status(200).json("Interakcija je ažurirana");
-        }
-    }
-    catch(err)
-    {
-        return res.status(500).json(err);
-    }
-})
+router.post('/', async (req, res) => {
+    const {
+        korisnik_id,
+        knjiga_id,
+        ocjena,
+        recenzija,
+        omiljena,
+    } = req.body;
 
-router.delete('/:id', async (req, res) =>
-{
-    const interakcijaId = req.params.id;
-    try
-    {
-        // Ovo ce realno bacit constraint ako postoji bilo kakva interakcija ili povijest slusanja
-        const [rows] = await db.pool.query("DELETE FROM interakcije WHERE interakcija_id = ?;", [interakcijaId]);
-        if (rows.length === 0)
-        {
-            return res.status(404).json({ Odgovor: "Brisanje nije uspjelo"});
-        }
-        else
-        {
-            return res.status(200).json("Interakcija obrisana");
-        }
+    if (!korisnik_id || !knjiga_id) {
+        return res.status(400).json({ error: 'Korisnik i knjiga su obavezni.' });
     }
-    catch(err)
-    {
+
+    try {
+        const [result] = await db.pool.query(
+            `INSERT INTO interakcije
+             (korisnik_id, knjiga_id, ocjena, recenzija, omiljena)
+             VALUES (?, ?, ?, ?, ?);`,
+            [
+                Number(korisnik_id),
+                Number(knjiga_id),
+                Number(ocjena ?? 0),
+                recenzija ?? '',
+                Boolean(omiljena ?? false),
+            ],
+        );
+
+        const [rows] = await db.pool.query('SELECT * FROM interakcije WHERE interakcija_id = ?;', [
+            result.insertId,
+        ]);
+
+        return res.status(201).json(rows[0]);
+    } catch (err) {
+        console.error('Greska pri dodavanju interakcije:', err);
+        return res.status(500).json({ error: 'Greska na serveru' });
+    }
+});
+
+router.put('/:id', async (req, res) => {
+    const interakcijaId = req.params.id;
+    const {
+        korisnik_id,
+        knjiga_id,
+        ocjena,
+        recenzija,
+        omiljena,
+    } = req.body;
+
+    try {
+        const [result] = await db.pool.query(
+            `UPDATE interakcije
+             SET korisnik_id = ?, knjiga_id = ?, ocjena = ?, recenzija = ?, omiljena = ?
+             WHERE interakcija_id = ?;`,
+            [
+                Number(korisnik_id),
+                Number(knjiga_id),
+                Number(ocjena ?? 0),
+                recenzija ?? '',
+                Boolean(omiljena ?? false),
+                interakcijaId,
+            ],
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ Odgovor: 'Azuriranje nije uspjelo' });
+        }
+
+        const [rows] = await db.pool.query('SELECT * FROM interakcije WHERE interakcija_id = ?;', [
+            interakcijaId,
+        ]);
+
+        return res.status(200).json(rows[0]);
+    } catch (err) {
         return res.status(500).json(err);
     }
-})
+});
+
+router.delete('/:id', async (req, res) => {
+    const interakcijaId = req.params.id;
+    try {
+        const [result] = await db.pool.query('DELETE FROM interakcije WHERE interakcija_id = ?;', [interakcijaId]);
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ Odgovor: 'Brisanje nije uspjelo' });
+        }
+        else {
+            return res.status(200).json('Interakcija obrisana');
+        }
+    }
+    catch(err) {
+        return res.status(500).json(err);
+    }
+});
 
 module.exports = router;
