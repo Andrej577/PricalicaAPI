@@ -1,43 +1,49 @@
+jest.mock('../Database/DB', () => require('./helpers/mockDb'));
+
 const request = require('supertest');
 const app = require('../index.js');
-const { pool } = require('../Database/DB');
+const mockDb = require('./helpers/mockDb');
 
-test('POST /login - ispravni podaci', async () => {
-    const res = await request(app)
-        .post('/login')
-        .send({
-            email: 'luka.babic@example.com',
-            lozinka: 'LukaBest88'
+const { query, resetAll } = mockDb.__mocks;
+
+describe('Ruta /login', () => {
+    beforeEach(() => {
+        resetAll();
+    });
+
+    test('POST /login vraca korisnika za ispravne podatke', async () => {
+        query.mockResolvedValueOnce([
+            [{ korisnik_id: 5, ime: 'Luka', prezime: 'Babić', email: 'luka@example.com' }],
+        ]);
+
+        const res = await request(app)
+            .post('/login')
+            .send({
+                email: 'luka@example.com',
+                lozinka: 'tajna',
+            });
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body).toEqual({
+            message: 'Prijava uspjesna',
+            korisnik_id: 5,
+            ime: 'Luka',
+            prezime: 'Babić',
+            email: 'luka@example.com',
         });
+    });
 
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toHaveProperty('message', 'Prijava uspješna');
-});
+    test('POST /login vraca 401 za neispravne podatke', async () => {
+        query.mockResolvedValueOnce([[]]);
 
-test('POST /login - pogrešna lozinka', async () => {
-    const res = await request(app)
-        .post('/login')
-        .send({
-            email: 'test@example.com',
-            lozinka: 'kriva'
-        });
+        const res = await request(app)
+            .post('/login')
+            .send({
+                email: 'krivi@example.com',
+                lozinka: 'krivo',
+            });
 
-    expect(res.statusCode).toBe(401);
-    expect(res.body).toHaveProperty('error');
-});
-
-test('POST /login - nepostojeći korisnik', async () => {
-    const res = await request(app)
-        .post('/login')
-        .send({
-            email: 'nepostojeci@example.com',
-            lozinka: 'bilošta'
-        });
-
-    expect(res.statusCode).toBe(401);
-    expect(res.body).toHaveProperty('error');
-});
-
-afterAll(async () => {
-    await pool.end(); // da Jest ne poludi zbog konekcije
+        expect(res.statusCode).toBe(401);
+        expect(res.body).toEqual({ error: 'Neispravni podaci za prijavu' });
+    });
 });
