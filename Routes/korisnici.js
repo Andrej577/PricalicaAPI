@@ -2,6 +2,35 @@ const express = require('express');
 const router = express.Router();
 const db = require('../Database/DB');
 
+async function dohvatiStanjeSheme(connection) {
+    const [tablice] = await connection.query(`
+        SELECT TABLE_NAME, COLUMN_NAME
+        FROM information_schema.COLUMNS
+        WHERE TABLE_SCHEMA = DATABASE()
+          AND TABLE_NAME IN ('korisnici', 'knjige', 'interakcije', 'povijest_slusanja', 'analitika', 'autori');
+    `);
+
+    const schema = new Map();
+
+    for (const { TABLE_NAME, COLUMN_NAME } of tablice) {
+        if (!schema.has(TABLE_NAME)) {
+            schema.set(TABLE_NAME, new Set());
+        }
+
+        schema.get(TABLE_NAME).add(COLUMN_NAME);
+    }
+
+    return schema;
+}
+
+function imaTablicu(schema, tableName) {
+    return schema.has(tableName);
+}
+
+function imaKolonu(schema, tableName, columnName) {
+    return schema.get(tableName)?.has(columnName) ?? false;
+}
+
 router.get('/', async (req, res) => {
     try {
         const [rows] = await db.pool.query('SELECT * FROM korisnici');
@@ -116,17 +145,98 @@ router.put('/:id', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
     const korisnikId = req.params.id;
+    let connection;
 
     try {
-        const [result] = await db.pool.query('DELETE FROM korisnici WHERE korisnik_id = ?;', [korisnikId]);
+        connection = await db.pool.getConnection();
+        await connection.beginTransaction();
 
-        if (result.affectedRows === 0) {
+        const schema = await dohvatiStanjeSheme(connection);
+
+        const [korisnici] = await connection.query(
+            'SELECT korisnik_id FROM korisnici WHERE korisnik_id = ?;',
+            [korisnikId],
+        );
+
+        if (korisnici.length === 0) {
+            await connection.rollback();
             return res.status(404).json({ odgovor: 'Brisanje nije uspjelo' });
         }
 
+        let knjigeAutora = [];
+
+        if (imaKolonu(schema, 'knjige', 'autor_id')) {
+            const [rows] = await connection.query(
+                'SELECT knjiga_id FROM knjige WHERE autor_id = ?;',
+                [korisnikId],
+            );
+            knjigeAutora = rows;
+        }
+
+        if (imaKolonu(schema, 'interakcije', 'korisnik_id')) {
+            await connection.query('DELETE FROM interakcije WHERE korisnik_id = ?;', [korisnikId]);
+        }
+
+        if (imaKolonu(schema, 'povijest_slusanja', 'korisnik_id')) {
+            await connection.query('DELETE FROM povijest_slusanja WHERE korisnik_id = ?;', [korisnikId]);
+        }
+
+        if (knjigeAutora.length > 0) {
+            const knjigaIds = knjigeAutora.map((knjiga) => knjiga.knjiga_id);
+            const placeholders = knjigaIds.map(() => '?').join(', ');
+
+            if (imaKolonu(schema, 'analitika', 'knjiga_id')) {
+                await connection.query(
+                    `DELETE FROM analitika WHERE knjiga_id IN (${placeholders});`,
+                    knjigaIds,
+                );
+            }
+
+            if (imaKolonu(schema, 'interakcije', 'knjiga_id')) {
+                await connection.query(
+                    `DELETE FROM interakcije WHERE knjiga_id IN (${placeholders});`,
+                    knjigaIds,
+                );
+            }
+
+            if (imaKolonu(schema, 'povijest_slusanja', 'knjiga_id')) {
+                await connection.query(
+                    `DELETE FROM povijest_slusanja WHERE knjiga_id IN (${placeholders});`,
+                    knjigaIds,
+                );
+            }
+
+            if (imaKolonu(schema, 'knjige', 'autor_id')) {
+                await connection.query('DELETE FROM knjige WHERE autor_id = ?;', [korisnikId]);
+            }
+        }
+
+        if (imaKolonu(schema, 'autori', 'autor_id')) {
+            await connection.query('DELETE FROM autori WHERE autor_id = ?;', [korisnikId]);
+        }
+
+        const [result] = await connection.query(
+            'DELETE FROM korisnici WHERE korisnik_id = ?;',
+            [korisnikId],
+        );
+
+        if (result.affectedRows === 0) {
+            await connection.rollback();
+            return res.status(404).json({ odgovor: 'Brisanje nije uspjelo' });
+        }
+
+        await connection.commit();
         return res.status(200).json('Korisnik obrisan');
     } catch (err) {
-        return res.status(500).json(err);
+        if (connection) {
+            await connection.rollback();
+        }
+        console.error('Greska pri brisanju korisnika:', err);
+        return res.status(500).json({
+            error: err.sqlMessage || err.message || 'Brisanje korisnika nije uspjelo.',
+        });
+    } finally {
+        connection?.release();
     }
 });
 
