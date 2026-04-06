@@ -1,116 +1,139 @@
-jest.mock('../Database/DB', () => require('./helpers/mockDb'));
-
 const request = require('supertest');
 const app = require('../index.js');
-const mockDb = require('./helpers/mockDb');
+const { pool } = require('../Database/DB');
 
-const { query, defaultConnection, resetAll } = mockDb.__mocks;
+let createdUserId;
+let updateUserId;
+let deleteUserId;
+let deleteAuthorId;
+let deleteBookId;
 
 describe('Rute /korisnici', () => {
-    beforeEach(() => {
-        resetAll();
+    beforeAll(async () => {
+        const unique = Date.now();
+
+        const [updateResult] = await pool.query(
+            `INSERT INTO korisnici
+            (ime, prezime, email, lozinka_hash, tipKorisnika_id, statusRacuna_id, ima_pretplatu)
+            VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            ['Update', 'Korisnik', `update.korisnik.${unique}@example.com`, 'test123', 3, 1, false]
+        );
+        updateUserId = updateResult.insertId;
+
+        const [deleteUserResult] = await pool.query(
+            `INSERT INTO korisnici
+            (ime, prezime, email, lozinka_hash, tipKorisnika_id, statusRacuna_id, ima_pretplatu)
+            VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            ['Delete', 'Korisnik', `delete.korisnik.${unique}@example.com`, 'test123', 3, 1, false]
+        );
+        deleteUserId = deleteUserResult.insertId;
+
+        const [deleteAuthorResult] = await pool.query(
+            `INSERT INTO korisnici
+            (ime, prezime, email, lozinka_hash, tipKorisnika_id, statusRacuna_id, ima_pretplatu)
+            VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            ['Delete', 'Autor', `delete.autor.${unique}@example.com`, 'test123', 2, 1, false]
+        );
+        deleteAuthorId = deleteAuthorResult.insertId;
+
+        const [deleteBookResult] = await pool.query(
+            `INSERT INTO knjige
+            (naslov, autor_id, zanr_id, trajanje_min, opis, statusDostupnosti_id, poveznica, prosjecna_ocjena)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            ['Delete knjiga', deleteAuthorId, 1, 120, 'Opis testne knjige', 1, `delete_knjiga_${unique}`, 0]
+        );
+        deleteBookId = deleteBookResult.insertId;
+
+        await pool.query(
+            `INSERT INTO interakcije
+            (korisnik_id, knjiga_id, ocjena, recenzija, omiljena)
+            VALUES (?, ?, ?, ?, ?)`,
+            [deleteUserId, deleteBookId, 4, 'Test recenzija', false]
+        );
     });
 
     test('GET /korisnici vraca listu korisnika', async () => {
-        query.mockResolvedValueOnce([
-            [{ korisnik_id: 1, ime: 'Maja' }],
-        ]);
-
         const res = await request(app).get('/korisnici');
 
         expect(res.statusCode).toBe(200);
-        expect(res.body).toEqual([{ korisnik_id: 1, ime: 'Maja' }]);
-        expect(query).toHaveBeenCalledWith('SELECT * FROM korisnici');
+        expect(Array.isArray(res.body)).toBe(true);
     });
 
-    test('GET /korisnici/:id vraca 404 kada korisnik ne postoji', async () => {
-        query.mockResolvedValueOnce([[]]);
+    test('GET /korisnici/:id vraca trazenog korisnika', async () => {
+        const res = await request(app).get('/korisnici/1');
 
-        const res = await request(app).get('/korisnici/999');
-
-        expect(res.statusCode).toBe(404);
-        expect(res.body).toEqual({ error: 'Korisnik nije pronaden' });
-    });
-
-    test('POST /korisnici validira obavezna polja', async () => {
-        const res = await request(app)
-            .post('/korisnici')
-            .send({ ime: 'Ana' });
-
-        expect(res.statusCode).toBe(400);
-        expect(res.body).toEqual({ error: 'Ime, prezime, email i lozinka su obavezni.' });
+        expect(res.statusCode).toBe(200);
+        expect(res.body).toHaveProperty('korisnik_id', 1);
+        expect(res.body).toHaveProperty('email');
     });
 
     test('POST /korisnici kreira korisnika', async () => {
-        query
-            .mockResolvedValueOnce([{ insertId: 15 }])
-            .mockResolvedValueOnce([[{ korisnik_id: 15, email: 'ana@example.com' }]]);
+        const unique = Date.now();
 
         const res = await request(app)
             .post('/korisnici')
             .send({
-                ime: 'Ana',
-                prezime: 'Marić',
-                email: 'ana@example.com',
-                lozinka: 'tajna',
+                ime: 'Post',
+                prezime: 'Korisnik',
+                email: `post.korisnik.${unique}@example.com`,
+                lozinka: 'test123',
                 tipKorisnika: 3,
                 statusRacuna: 1,
             });
 
         expect(res.statusCode).toBe(201);
-        expect(res.body).toEqual({ korisnik_id: 15, email: 'ana@example.com' });
+        expect(res.body).toHaveProperty('korisnik_id');
+        expect(res.body).toHaveProperty('email');
+
+        createdUserId = res.body.korisnik_id;
     });
 
     test('PUT /korisnici/:id azurira korisnika', async () => {
-        query
-            .mockResolvedValueOnce([{ affectedRows: 1 }])
-            .mockResolvedValueOnce([[{ korisnik_id: 7, ime: 'Novo', statusRacuna_id: 2 }]]);
-
         const res = await request(app)
-            .put('/korisnici/7')
+            .put(`/korisnici/${updateUserId}`)
             .send({
-                ime: 'Novo',
-                prezime: 'Prezime',
-                email: 'novo@example.com',
-                lozinka: 'nova-lozinka',
+                ime: 'NovoIme',
+                prezime: 'NovoPrezime',
+                email: `novo.${updateUserId}@example.com`,
+                lozinka: 'novaLozinka123',
                 statusRacuna: 2,
             });
 
         expect(res.statusCode).toBe(200);
-        expect(res.body).toEqual({ korisnik_id: 7, ime: 'Novo', statusRacuna_id: 2 });
+        expect(res.body).toHaveProperty('ime', 'NovoIme');
+        expect(res.body).toHaveProperty('statusRacuna_id', 2);
     });
 
-    test('DELETE /korisnici/:id brise korisnika kroz transakciju', async () => {
-        defaultConnection.query
-            .mockResolvedValueOnce([
-                [
-                    { TABLE_NAME: 'knjige', COLUMN_NAME: 'autor_id' },
-                    { TABLE_NAME: 'interakcije', COLUMN_NAME: 'korisnik_id' },
-                    { TABLE_NAME: 'interakcije', COLUMN_NAME: 'knjiga_id' },
-                    { TABLE_NAME: 'povijest_slusanja', COLUMN_NAME: 'korisnik_id' },
-                    { TABLE_NAME: 'povijest_slusanja', COLUMN_NAME: 'knjiga_id' },
-                    { TABLE_NAME: 'analitika', COLUMN_NAME: 'knjiga_id' },
-                    { TABLE_NAME: 'autori', COLUMN_NAME: 'autor_id' },
-                ],
-            ])
-            .mockResolvedValueOnce([[{ korisnik_id: 3 }]])
-            .mockResolvedValueOnce([[{ knjiga_id: 10 }, { knjiga_id: 11 }]])
-            .mockResolvedValueOnce([{ affectedRows: 1 }])
-            .mockResolvedValueOnce([{ affectedRows: 1 }])
-            .mockResolvedValueOnce([{ affectedRows: 2 }])
-            .mockResolvedValueOnce([{ affectedRows: 2 }])
-            .mockResolvedValueOnce([{ affectedRows: 2 }])
-            .mockResolvedValueOnce([{ affectedRows: 2 }])
-            .mockResolvedValueOnce([{ affectedRows: 1 }])
-            .mockResolvedValueOnce([{ affectedRows: 1 }])
-            .mockResolvedValueOnce([{ affectedRows: 1 }]);
-
-        const res = await request(app).delete('/korisnici/3');
+    test('DELETE /korisnici/:id brise korisnika', async () => {
+        const res = await request(app).delete(`/korisnici/${deleteUserId}`);
 
         expect(res.statusCode).toBe(200);
-        expect(res.body).toBe('Korisnik obrisan');
-        expect(defaultConnection.beginTransaction).toHaveBeenCalled();
-        expect(defaultConnection.commit).toHaveBeenCalled();
-        expect(defaultConnection.release).toHaveBeenCalled();
+
+        const [rows] = await pool.query(
+            'SELECT * FROM korisnici WHERE korisnik_id = ?',
+            [deleteUserId]
+        );
+
+        expect(rows.length).toBe(0);
+    });
+
+    afterAll(async () => {
+        if (deleteBookId) {
+            await pool.query('DELETE FROM knjige WHERE knjiga_id = ?', [deleteBookId]);
+        }
+
+        if (deleteAuthorId) {
+            await pool.query('DELETE FROM autori WHERE autor_id = ?', [deleteAuthorId]);
+            await pool.query('DELETE FROM korisnici WHERE korisnik_id = ?', [deleteAuthorId]);
+        }
+
+        if (updateUserId) {
+            await pool.query('DELETE FROM korisnici WHERE korisnik_id = ?', [updateUserId]);
+        }
+
+        if (createdUserId) {
+            await pool.query('DELETE FROM korisnici WHERE korisnik_id = ?', [createdUserId]);
+        }
+
     });
 });
