@@ -3,7 +3,7 @@ FROM node:20
 WORKDIR /app
 
 # Instaliraj pakete
-RUN npm install express mysql2 dotenv jest supertest
+RUN npm install cors express mysql2 dotenv jest supertest
 
 # Kopiraj ostatak aplikacije
 COPY . .
